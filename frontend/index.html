@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroke Risk Analyzer | Medical Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Modern Theme Toggle - Top Right -->
+    <div class="theme-toggle-wrapper">
+        <button id="themeToggleBtn" class="modern-theme-toggle" aria-label="Toggle theme">
+            <span class="toggle-icon sun-icon">
+                <i class="fas fa-sun"></i>
+            </span>
+            <span class="toggle-icon moon-icon">
+                <i class="fas fa-moon"></i>
+            </span>
+            <span class="toggle-slider"></span>
+        </button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading data...</div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1><i class="fas fa-heartbeat"></i> Stroke Risk Analyzer</h1>
+                    <p>Advanced medical analysis dashboard for stroke prevention</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-main">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar">
+                <div class="filters-container">
+                    <h3 class="filters-title">
+                        <i class="fas fa-filter"></i> Smart Filters
+                    </h3>
+                    
+                    <!-- 1. AGE -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-user-clock"></i> Age (years)
+                        </div>
+                        <div class="age-range-inputs">
+                            <input type="number" id="min-age" class="age-input" placeholder="Min" min="0" max="100" value="0">
+                            <span class="age-separator">-</span>
+                            <input type="number" id="max-age" class="age-input" placeholder="Max" min="0" max="100" value="100">
+                        </div>
+                    </div>
+
+                    <!-- 2. GENDER -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-venus-mars"></i> Gender
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="gender-all" name="gender" value="all" checked>
+                                <label for="gender-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="gender-male" name="gender" value="Male">
+                                <label for="gender-male">Male</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="gender-female" name="gender" value="Female">
+                                <label for="gender-female">Female</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. HYPERTENSION -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-heartbeat"></i> Hypertension
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="hyper-all" name="hypertension" value="all" checked>
+                                <label for="hyper-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="hyper-yes" name="hypertension" value="1">
+                                <label for="hyper-yes">Yes</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="hyper-no" name="hypertension" value="0">
+                                <label for="hyper-no">No</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. HEART DISEASE -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-heart"></i> Heart Disease
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="heart-all" name="heart_disease" value="all" checked>
+                                <label for="heart-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="heart-yes" name="heart_disease" value="1">
+                                <label for="heart-yes">Yes</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="heart-no" name="heart_disease" value="0">
+                                <label for="heart-no">No</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. STROKE HISTORY -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-brain"></i> Stroke History
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="stroke-all" name="stroke" value="all" checked>
+                                <label for="stroke-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="stroke-yes" name="stroke" value="1">
+                                <label for="stroke-yes">Had Stroke</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="stroke-no" name="stroke" value="0">
+                                <label for="stroke-no">No Stroke</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. MARITAL STATUS -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-ring"></i> Marital Status
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="married-all" name="ever_married" value="all" checked>
+                                <label for="married-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="married-yes" name="ever_married" value="Yes">
+                                <label for="married-yes">Married</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="married-no" name="ever_married" value="No">
+                                <label for="married-no">Single</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. WORK TYPE -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-briefcase"></i> Work Type
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="work-all" name="work_type" value="all" checked>
+                                <label for="work-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="work-private" name="work_type" value="Private">
+                                <label for="work-private">Private</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="work-self" name="work_type" value="Self-employed">
+                                <label for="work-self">Self-employed</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="work-govt" name="work_type" value="Govt_job">
+                                <label for="work-govt">Govt Job</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="work-child" name="work_type" value="children">
+                                <label for="work-child">Child</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="work-never" name="work_type" value="Never_worked">
+                                <label for="work-never">Never worked</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. RESIDENCE TYPE -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-home"></i> Residence Type
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="res-all" name="Residence_type" value="all" checked>
+                                <label for="res-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="res-urban" name="Residence_type" value="Urban">
+                                <label for="res-urban">Urban</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="res-rural" name="Residence_type" value="Rural">
+                                <label for="res-rural">Rural</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. GLUCOSE LEVEL -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-tint"></i> Glucose Level
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="glucose-all" name="glucose" value="all" checked>
+                                <label for="glucose-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="glucose-low" name="glucose" value="low">
+                                <label for="glucose-low">Low (&lt;70)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="glucose-normal" name="glucose" value="normal">
+                                <label for="glucose-normal">Normal (70-100)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="glucose-prediabetes" name="glucose" value="prediabetes">
+                                <label for="glucose-prediabetes">Pre-diabetes (100-125)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="glucose-diabetes" name="glucose" value="diabetes">
+                                <label for="glucose-diabetes">Diabetes (125-200)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="glucose-severe" name="glucose" value="severe">
+                                <label for="glucose-severe">Severe (&gt;200)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. BMI CATEGORY -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-weight"></i> BMI Category
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="bmi-all" name="bmi" value="all" checked>
+                                <label for="bmi-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="bmi-underweight" name="bmi" value="underweight">
+                                <label for="bmi-underweight">Underweight (&lt;18.5)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="bmi-normal" name="bmi" value="normal">
+                                <label for="bmi-normal">Normal (18.5-25)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="bmi-overweight" name="bmi" value="overweight">
+                                <label for="bmi-overweight">Overweight (25-30)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="bmi-obese1" name="bmi" value="obese1">
+                                <label for="bmi-obese1">Obese I (30-35)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="bmi-obese2" name="bmi" value="obese2">
+                                <label for="bmi-obese2">Obese II (35-40)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="bmi-obese3" name="bmi" value="obese3">
+                                <label for="bmi-obese3">Obese III (&gt;40)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 11. SMOKING STATUS -->
+                    <div class="sidebar-filter-group">
+                        <div class="filter-group-title">
+                            <i class="fas fa-smoking"></i> Smoking Status
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" id="smoke-all" name="smoking_status" value="all" checked>
+                                <label for="smoke-all">All</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="smoke-never" name="smoking_status" value="never smoked">
+                                <label for="smoke-never">Never smoked</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="smoke-former" name="smoking_status" value="formerly smoked">
+                                <label for="smoke-former">Former smoker</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="smoke-current" name="smoking_status" value="smokes">
+                                <label for="smoke-current">Current smoker</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" id="smoke-unknown" name="smoking_status" value="Unknown">
+                                <label for="smoke-unknown">Unknown</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FILTER ACTIONS -->
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-check"></i> Apply Filters
+                        </button>
+                        <button class="btn btn-outline" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Reset All
+                        </button>
+                    </div>
+
+                    <!-- ACTIVE FILTERS TAGS -->
+                    <div class="active-filters-container" id="activeFiltersContainer" style="display: none;">
+                        <div class="active-filters-title">
+                            <span><i class="fas fa-tags"></i> Active Filters</span>
+                            <button class="clear-all-btn" onclick="resetFilters()">
+                                <i class="fas fa-times"></i> Clear all
+                            </button>
+                        </div>
+                        <div class="active-filters-tags" id="activeFiltersTags"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Stats Overview -->
+                <div class="stats-grid" id="statsOverview"></div>
+
+                <!-- Tabs Navigation -->
+                <nav class="tabs-navigation">
+                    <button class="tab-btn active" onclick="switchTab('univariate')">
+                        <i class="fas fa-chart-bar"></i> Univariate
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('bivariate')">
+                        <i class="fas fa-project-diagram"></i> Bivariate
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('multivariate')">
+                        <i class="fas fa-cogs"></i> Multivariate
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('dataset')">
+                        <i class="fas fa-database"></i> Database
+                    </button>
+                </nav>
+
+                <!-- Tab 1: Univariate Analysis -->
+                <section id="univariate-tab" class="charts-section active">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-bar"></i> Univariate Analysis
+                    </h2>
+                    <div class="charts-grid">
+                        <!-- Stroke Distribution -->
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3 class="chart-title"><i class="fas fa-heartbeat"></i> Stroke Distribution</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="strokeChart"></canvas>
+                            </div>
+                        </div>
+                        <!-- Age Distribution -->
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3 class="chart-title"><i class="fas fa-user-clock"></i> Age Distribution</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="ageChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 2: Bivariate Analysis -->
+                <section id="bivariate-tab" class="charts-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-project-diagram"></i> Bivariate Analysis: All Variables vs Stroke
+                    </h2>
+                    
+                    <!-- Numerical Variables -->
+                    <h3 style="color: var(--blue); margin: 2rem 0 1rem;">Numerical Variables vs Stroke</h3>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-user-clock"></i> Age vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="ageStrokeViolin"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-tint"></i> Glucose vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="glucoseStrokeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-weight"></i> BMI vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="bmiStrokeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categorical Variables -->
+                    <h3 style="color: var(--blue); margin: 3rem 0 1rem;">Categorical Variables vs Stroke</h3>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-venus-mars"></i> Gender vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="genderStrokeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-heartbeat"></i> Hypertension vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="hypertensionStrokeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-heart"></i> Heart Disease vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="heartDiseaseStrokeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-ring"></i> Marital Status vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="marriedStrokeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-briefcase"></i> Work Type vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="workTypeStrokeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-home"></i> Residence Type vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="residenceStrokeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-smoking"></i> Smoking Status vs Stroke</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="smokingStrokeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 3: Multivariate Analysis -->
+                <section id="multivariate-tab" class="charts-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-cogs"></i> Multivariate Analysis
+                    </h2>
+                    <div class="charts-grid">
+                        <div class="chart-container full-width">
+                            <h3 class="chart-title"><i class="fas fa-stream"></i> Parallel Coordinates Plot</h3>
+                            <div class="chart-wrapper" style="height: 400px;">
+                                <canvas id="parallelCoordinatesChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container full-width">
+                            <h3 class="chart-title"><i class="fas fa-star"></i> Feature Importance Analysis</h3>
+                            <div class="chart-wrapper" style="height: 350px;">
+                                <canvas id="importanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 4: Dataset Viewer -->
+                <section id="dataset-tab" class="charts-section">
+                    <div class="dataset-viewer">
+                        <h2 class="section-title">
+                            <i class="fas fa-database"></i> Complete Database
+                        </h2>
+                        <div class="dataset-controls">
+                            <div class="search-container">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="datasetSearch" class="search-input" placeholder="Search any field..." oninput="searchDataset()">
+                            </div>
+                            <div>
+                                <button class="btn btn-primary" onclick="loadFullDataset()">
+                                    <i class="fas fa-sync"></i> Load Data
+                                </button>
+                                <button class="btn btn-outline" onclick="exportDataset()">
+                                    <i class="fas fa-download"></i> Export CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="dataset-table-container">
+                            <table class="dataset-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Gender</th>
+                                        <th>Age</th>
+                                        <th>Hypertension</th>
+                                        <th>Heart Disease</th>
+                                        <th>Married</th>
+                                        <th>Work</th>
+                                        <th>Residence</th>
+                                        <th>Glucose</th>
+                                        <th>BMI</th>
+                                        <th>Smoking</th>
+                                        <th>Stroke</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="datasetBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="dataset-pagination">
+                            <button class="pagination-btn" onclick="previousPage()" id="prevBtn" disabled>
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </button>
+                            <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                            <button class="pagination-btn" onclick="nextPage()" id="nextBtn" disabled>
+                                Next <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
